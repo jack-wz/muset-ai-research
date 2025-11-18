@@ -68,5 +68,29 @@ class Settings(BaseSettings):
     # Skills Configuration
     skills_dir: str = "./skills"
 
+    # Logging Configuration
+    log_level: str = "INFO"
+    log_format: str = "json"  # json or text
+    log_file: Optional[str] = None
+
+    # Monitoring Configuration
+    enable_metrics: bool = True
+    metrics_port: int = 9090
+
+    # Performance Configuration
+    request_timeout: int = 30
+    max_concurrent_requests: int = 100
+    rate_limit_requests_per_minute: int = 60
+
+    # Error Recovery Configuration
+    enable_circuit_breaker: bool = True
+    circuit_breaker_threshold: int = 5
+    circuit_breaker_timeout: int = 60
+
+    # Retry Configuration
+    max_retries: int = 3
+    retry_initial_delay: float = 1.0
+    retry_max_delay: float = 60.0
+
 
 settings = Settings()
