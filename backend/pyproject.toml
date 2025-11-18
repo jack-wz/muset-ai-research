@@ -40,6 +40,7 @@ flake8 = "^7.1.1"
 mypy = "^1.13.0"
 pre-commit = "^4.0.1"
 locust = "^2.32.3"
+aiosqlite = "^0.21.0"
 
 [build-system]
 requires = ["poetry-core"]
