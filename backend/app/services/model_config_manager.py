@@ -432,3 +432,176 @@ class ModelConfigManager:
                 "model": config.model_name if config else "unknown",
                 "error": str(e),
             }
+
+    async def export_configurations(
+        self, config_ids: Optional[List[int]] = None, include_api_keys: bool = False
+    ) -> Dict[str, Any]:
+        """
+        Export model configurations to a dictionary.
+
+        Args:
+            config_ids: Optional list of config IDs to export. If None, exports all.
+            include_api_keys: Whether to include API keys (default: False for security)
+
+        Returns:
+            Dictionary containing exported configurations
+
+        Note:
+            API keys are excluded by default for security reasons.
+            When exporting for backup, set include_api_keys=False and
+            users will need to re-enter keys after import.
+        """
+        query = select(ModelConfig)
+        if config_ids:
+            query = query.where(ModelConfig.id.in_(config_ids))
+
+        result = await self.db.execute(query)
+        configs = result.scalars().all()
+
+        exported = {
+            "version": "1.0",
+            "models": [],
+        }
+
+        for config in configs:
+            model_data = {
+                "provider": config.provider,
+                "label": config.label,
+                "model_name": config.model_name,
+                "base_url": config.base_url,
+                "is_default": config.is_default,
+                "capabilities": config.capabilities,
+                "guardrails": config.guardrails,
+            }
+
+            # Only include API keys if explicitly requested
+            if include_api_keys and config.api_key_secret_id:
+                try:
+                    from app.core.security import decrypt_api_key
+                    model_data["api_key"] = decrypt_api_key(config.api_key_secret_id)
+                except Exception as e:
+                    logger.warning(f"Failed to decrypt API key for {config.label}: {str(e)}")
+                    model_data["api_key"] = None
+            else:
+                model_data["api_key"] = None
+
+            exported["models"].append(model_data)
+
+        logger.info(f"Exported {len(exported['models'])} model configurations")
+        return exported
+
+    async def import_configurations(
+        self, data: Dict[str, Any], overwrite: bool = False
+    ) -> List[ModelConfig]:
+        """
+        Import model configurations from a dictionary.
+
+        Args:
+            data: Dictionary containing configurations to import
+            overwrite: Whether to overwrite existing configurations with same label
+
+        Returns:
+            List of imported configurations
+
+        Raises:
+            ValidationError: If import validation fails
+
+        Note:
+            When importing, users will need to provide API keys for new
+            configurations if they were not included in the export.
+        """
+        if "models" not in data:
+            raise ValidationError("Invalid import data: missing 'models' key")
+
+        imported_configs = []
+
+        for model_data in data["models"]:
+            try:
+                # Validate required fields
+                required_fields = ["provider", "label", "model_name"]
+                for field in required_fields:
+                    if field not in model_data:
+                        raise ValidationError(f"Missing required field: {field}")
+
+                # Check if model with same label already exists
+                result = await self.db.execute(
+                    select(ModelConfig).where(ModelConfig.label == model_data["label"])
+                )
+                existing_config = result.scalar_one_or_none()
+
+                if existing_config and not overwrite:
+                    logger.warning(f"Skipping existing model: {model_data['label']}")
+                    continue
+
+                if existing_config and overwrite:
+                    # Update existing
+                    existing_config.provider = model_data["provider"]
+                    existing_config.model_name = model_data["model_name"]
+                    existing_config.base_url = model_data.get("base_url")
+                    existing_config.is_default = model_data.get("is_default", False)
+                    existing_config.capabilities = model_data.get(
+                        "capabilities",
+                        {
+                            "streaming": True,
+                            "vision": False,
+                            "toolUse": True,
+                            "multilingual": True,
+                        },
+                    )
+                    existing_config.guardrails = model_data.get("guardrails")
+
+                    # Update API key if provided
+                    if model_data.get("api_key"):
+                        from app.core.security import encrypt_api_key
+                        existing_config.api_key_secret_id = encrypt_api_key(
+                            model_data["api_key"]
+                        )
+
+                    config = existing_config
+                else:
+                    # Create new
+                    api_key_secret_id = None
+                    if model_data.get("api_key"):
+                        from app.core.security import encrypt_api_key
+                        api_key_secret_id = encrypt_api_key(model_data["api_key"])
+
+                    # If this is marked as default, unset other defaults
+                    if model_data.get("is_default"):
+                        await self._unset_all_defaults()
+
+                    config = ModelConfig(
+                        provider=model_data["provider"],
+                        label=model_data["label"],
+                        model_name=model_data["model_name"],
+                        api_key_secret_id=api_key_secret_id,
+                        base_url=model_data.get("base_url"),
+                        is_default=model_data.get("is_default", False),
+                        capabilities=model_data.get(
+                            "capabilities",
+                            {
+                                "streaming": True,
+                                "vision": False,
+                                "toolUse": True,
+                                "multilingual": True,
+                            },
+                        ),
+                        guardrails=model_data.get("guardrails"),
+                    )
+                    self.db.add(config)
+
+                imported_configs.append(config)
+
+            except Exception as e:
+                logger.error(f"Failed to import model {model_data.get('label')}: {str(e)}")
+                # Don't fail entire import, just skip this config
+                continue
+
+        await self.db.commit()
+
+        # Refresh all imported configs
+        for config in imported_configs:
+            await self.db.refresh(config)
+
+        logger.info(f"Imported {len(imported_configs)} model configurations")
+
+        return imported_configs

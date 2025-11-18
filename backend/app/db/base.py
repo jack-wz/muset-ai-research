@@ -12,6 +12,7 @@ from app.models.config import MCPServerConfig, ModelConfig, SkillPackage  # noqa
 from app.models.file import ContextFile, FileVersion  # noqa: F401, E402
 from app.models.memory import Memory  # noqa: F401, E402
 from app.models.page import Page  # noqa: F401, E402
+from app.models.style import WritingStyle  # noqa: F401, E402
 from app.models.task import TodoTask, WritingPlan  # noqa: F401, E402
 from app.models.user import User  # noqa: F401, E402
 from app.models.workspace import Workspace, WorkspaceMember  # noqa: F401, E402
