@@ -6,7 +6,14 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from app.api.v1 import api_router
 from app.core.config import settings
+from app.core.exceptions import (
+    MusetException,
+    general_exception_handler,
+    muset_exception_handler,
+)
+from app.core.middleware import RequestLoggingMiddleware
 
 
 @asynccontextmanager
@@ -27,7 +34,17 @@ app = FastAPI(
     version=settings.app_version,
     debug=settings.debug,
     lifespan=lifespan,
+    docs_url=f"{settings.api_v1_prefix}/docs",
+    redoc_url=f"{settings.api_v1_prefix}/redoc",
+    openapi_url=f"{settings.api_v1_prefix}/openapi.json",
 )
+
+# Register exception handlers
+app.add_exception_handler(MusetException, muset_exception_handler)
+app.add_exception_handler(Exception, general_exception_handler)
+
+# Add middleware
+app.add_middleware(RequestLoggingMiddleware)
 
 # CORS middleware
 app.add_middleware(
@@ -37,6 +54,9 @@ app.add_middleware(
     allow_methods=settings.cors_allow_methods,
     allow_headers=settings.cors_allow_headers,
 )
+
+# Include API routers
+app.include_router(api_router, prefix=settings.api_v1_prefix)
 
 
 @app.get("/")
