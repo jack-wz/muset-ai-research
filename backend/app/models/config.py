@@ -47,10 +47,18 @@ class MCPServerConfig(Base, BaseMixin):
     __tablename__ = "mcp_server_configs"
 
     name = Column(String, nullable=False, unique=True)
-    endpoint = Column(String, nullable=False)
-    protocol = Column(String, default="http", nullable=False)  # http, ws
+    protocol = Column(String, default="stdio", nullable=False)  # stdio, http, ws
+
+    # For stdio protocol
+    command = Column(String, nullable=True)  # Command to start MCP server
+    args = Column(ARRAY(String), nullable=True)  # Command arguments
+    env = Column(JSONB, nullable=True)  # Environment variables
+
+    # For http/ws protocols
+    endpoint = Column(String, nullable=True)  # URL endpoint for http/ws
     auth_type = Column(String, default="none", nullable=False)  # none, api_key, oauth
     auth_secret_id = Column(String, nullable=True)
+
     status = Column(
         String,
         default="disconnected",
@@ -66,9 +74,12 @@ class MCPServerConfig(Base, BaseMixin):
         default={"maxAttempts": 3, "backoffMs": 1000},
     )
 
+    # Auto-reconnect setting
+    auto_reconnect = Column(Boolean, default=True, nullable=False)
+
     def __repr__(self) -> str:
         """String representation."""
-        return f"<MCPServerConfig {self.name}>"
+        return f"<MCPServerConfig {self.name} ({self.protocol})>"
 
 
 class SkillPackage(Base, BaseMixin):
