@@ -277,6 +277,7 @@
   - 设置 Tailwind CSS 和 Emotion
   - 配置 Radix UI 组件库
   - 创建基础布局组件
+  - 引入统一的 SVG 图标库（如 Phosphor/Radix Icons），禁止使用 emoji 作为图标
   - _需求：7.1, 24.5_
 
 - [ ] 18. 实现认证流程（前端）
