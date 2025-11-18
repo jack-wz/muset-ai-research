@@ -68,6 +68,38 @@ class PermissionDeniedError(MusetException):
         super().__init__(message, status.HTTP_403_FORBIDDEN)
 
 
+class MCPConnectionError(MusetException):
+    """MCP server connection error."""
+
+    def __init__(self, message: str = "MCP connection error"):
+        """Initialize MCP connection error."""
+        super().__init__(message, status.HTTP_503_SERVICE_UNAVAILABLE)
+
+
+class MCPToolConversionError(MusetException):
+    """MCP tool conversion error."""
+
+    def __init__(self, message: str = "MCP tool conversion error"):
+        """Initialize MCP tool conversion error."""
+        super().__init__(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class SkillLoadError(MusetException):
+    """Skill loading error."""
+
+    def __init__(self, message: str = "Skill load error"):
+        """Initialize skill load error."""
+        super().__init__(message, status.HTTP_400_BAD_REQUEST)
+
+
+class SkillValidationError(MusetException):
+    """Skill validation error."""
+
+    def __init__(self, message: str = "Skill validation error"):
+        """Initialize skill validation error."""
+        super().__init__(message, status.HTTP_422_UNPROCESSABLE_ENTITY)
+
+
 async def muset_exception_handler(request: Request, exc: MusetException) -> JSONResponse:
     """Handle Muset custom exceptions.
 

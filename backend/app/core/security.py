@@ -1,7 +1,10 @@
 """Security utilities for authentication and authorization."""
+import base64
+import hashlib
 from datetime import datetime, timedelta
 from typing import Any, Optional
 
+from cryptography.fernet import Fernet
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 
@@ -9,6 +12,12 @@ from app.core.config import settings
 
 # Password hashing context
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+# Initialize encryption key from secret
+_encryption_key = base64.urlsafe_b64encode(
+    hashlib.sha256(settings.secret_key.encode()).digest()
+)
+_cipher = Fernet(_encryption_key)
 
 
 def create_access_token(subject: str, expires_delta: Optional[timedelta] = None) -> str:
@@ -72,3 +81,30 @@ def get_password_hash(password: str) -> str:
         Hashed password
     """
     return pwd_context.hash(password)
+
+
+def encrypt_api_key(api_key: str) -> str:
+    """Encrypt an API key for secure storage.
+
+    Args:
+        api_key: Plain text API key
+
+    Returns:
+        Encrypted API key (base64 encoded)
+    """
+    encrypted = _cipher.encrypt(api_key.encode())
+    return base64.urlsafe_b64encode(encrypted).decode()
+
+
+def decrypt_api_key(encrypted_key: str) -> str:
+    """Decrypt an encrypted API key.
+
+    Args:
+        encrypted_key: Encrypted API key (base64 encoded)
+
+    Returns:
+        Decrypted API key
+    """
+    encrypted_bytes = base64.urlsafe_b64decode(encrypted_key.encode())
+    decrypted = _cipher.decrypt(encrypted_bytes)
+    return decrypted.decode()
