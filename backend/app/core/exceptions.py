@@ -52,6 +52,22 @@ class ValidationError(MusetException):
         super().__init__(message, status.HTTP_422_UNPROCESSABLE_ENTITY)
 
 
+class FileNotFoundError(MusetException):
+    """File not found error."""
+
+    def __init__(self, message: str = "File not found"):
+        """Initialize file not found error."""
+        super().__init__(message, status.HTTP_404_NOT_FOUND)
+
+
+class PermissionDeniedError(MusetException):
+    """Permission denied error."""
+
+    def __init__(self, message: str = "Permission denied"):
+        """Initialize permission denied error."""
+        super().__init__(message, status.HTTP_403_FORBIDDEN)
+
+
 async def muset_exception_handler(request: Request, exc: MusetException) -> JSONResponse:
     """Handle Muset custom exceptions.
 
