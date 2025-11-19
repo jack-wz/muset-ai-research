@@ -16,13 +16,13 @@ class TestStyleManager:
     """Test suite for style manager."""
 
     @pytest.mark.asyncio
-    async def test_create_style(self, db_session: AsyncSession):
+    async def test_create_style(self, test_db: AsyncSession):
         """
         Test: Create a new writing style.
 
         Validates requirement 13.1: Style configuration interface.
         """
-        manager = StyleManager(db_session)
+        manager = StyleManager(test_db)
 
         style = await manager.create_style(
             user_id=1,
@@ -40,13 +40,13 @@ class TestStyleManager:
         assert style.vocabulary_complexity == 7
 
     @pytest.mark.asyncio
-    async def test_analyze_samples(self, db_session: AsyncSession):
+    async def test_analyze_samples(self, test_db: AsyncSession):
         """
         Test: Analyze sample texts for style features.
 
         Validates requirement 13.2: Style sample upload and analysis.
         """
-        manager = StyleManager(db_session)
+        manager = StyleManager(test_db)
 
         sample_texts = [
             "This is a professional document. It uses formal language.",
@@ -61,13 +61,13 @@ class TestStyleManager:
         assert features["sample_count"] == 2
 
     @pytest.mark.asyncio
-    async def test_get_user_styles(self, db_session: AsyncSession):
+    async def test_get_user_styles(self, test_db: AsyncSession):
         """
         Test: Get all styles for a user.
 
         Validates requirement 13.4: Style skill integration.
         """
-        manager = StyleManager(db_session)
+        manager = StyleManager(test_db)
 
         # Create multiple styles
         style1 = await manager.create_style(
@@ -90,13 +90,13 @@ class TestStyleManager:
         assert "Style 2" in style_names
 
     @pytest.mark.asyncio
-    async def test_activate_style(self, db_session: AsyncSession):
+    async def test_activate_style(self, test_db: AsyncSession):
         """
         Test: Activate a writing style.
 
         Validates requirement 13.5: Style switching.
         """
-        manager = StyleManager(db_session)
+        manager = StyleManager(test_db)
 
         style1 = await manager.create_style(
             user_id=1,
@@ -115,7 +115,7 @@ class TestStyleManager:
         assert activated.is_active is True
 
         # Verify style1 is deactivated
-        await db_session.refresh(style1)
+        await test_db.refresh(style1)
         assert style1.is_active is False
 
         # Get active style
@@ -124,11 +124,11 @@ class TestStyleManager:
         assert active_style.id == style2.id
 
     @pytest.mark.asyncio
-    async def test_delete_style(self, db_session: AsyncSession):
+    async def test_delete_style(self, test_db: AsyncSession):
         """
         Test: Delete a writing style.
         """
-        manager = StyleManager(db_session)
+        manager = StyleManager(test_db)
 
         style = await manager.create_style(
             user_id=1,
@@ -146,11 +146,11 @@ class TestStyleManager:
         assert style_id not in style_ids
 
     @pytest.mark.asyncio
-    async def test_cannot_delete_active_style(self, db_session: AsyncSession):
+    async def test_cannot_delete_active_style(self, test_db: AsyncSession):
         """
         Test: Cannot delete active style.
         """
-        manager = StyleManager(db_session)
+        manager = StyleManager(test_db)
 
         style = await manager.create_style(
             user_id=1,
@@ -165,13 +165,13 @@ class TestStyleManager:
             await manager.delete_style(style.id, user_id=1)
 
     @pytest.mark.asyncio
-    async def test_build_style_prompt(self, db_session: AsyncSession):
+    async def test_build_style_prompt(self, test_db: AsyncSession):
         """
         Test: Build AI prompt from style configuration.
 
         Validates requirement 13.3: Style application logic.
         """
-        manager = StyleManager(db_session)
+        manager = StyleManager(test_db)
 
         style = await manager.create_style(
             user_id=1,
@@ -189,11 +189,11 @@ class TestStyleManager:
         assert "casual" in prompt.lower()
 
     @pytest.mark.asyncio
-    async def test_formality_level_validation(self, db_session: AsyncSession):
+    async def test_formality_level_validation(self, test_db: AsyncSession):
         """
         Test: Formality level must be between 1 and 10.
         """
-        manager = StyleManager(db_session)
+        manager = StyleManager(test_db)
 
         # Invalid formality level
         with pytest.raises(Exception):
@@ -204,13 +204,13 @@ class TestStyleManager:
             )
 
     @pytest.mark.asyncio
-    async def test_style_with_samples(self, db_session: AsyncSession):
+    async def test_style_with_samples(self, test_db: AsyncSession):
         """
         Test: Create style with sample texts.
 
         Validates requirement 13.2: Style sample upload.
         """
-        manager = StyleManager(db_session)
+        manager = StyleManager(test_db)
 
         samples = [
             "This is an example of my writing style.",
