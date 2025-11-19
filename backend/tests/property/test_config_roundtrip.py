@@ -16,7 +16,7 @@ Test Strategy:
 """
 
 import pytest
-from hypothesis import given, settings, strategies as st
+from hypothesis import HealthCheck, given, settings, strategies as st
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.config import MCPServerConfig, ModelConfig
@@ -76,9 +76,13 @@ class TestConfigRoundtripConsistency:
 
     @pytest.mark.asyncio
     @given(configs=st.lists(model_config_strategy(), min_size=1, max_size=5))
-    @settings(max_examples=10, deadline=5000)
+    @settings(
+        max_examples=10,
+        deadline=5000,
+        suppress_health_check=[HealthCheck.function_scoped_fixture],
+    )
     async def test_model_config_roundtrip(
-        self, configs, db_session: AsyncSession
+        self, configs, async_db_session: AsyncSession
     ):
         """
         Property: Model configurations can be exported and re-imported without data loss.
@@ -87,7 +91,13 @@ class TestConfigRoundtripConsistency:
         When: Export configurations, delete originals, then import
         Then: Imported configurations match original configurations
         """
-        manager = ModelConfigManager(db_session)
+        manager = ModelConfigManager(async_db_session)
+
+        # Clean up database before each hypothesis example
+        from sqlalchemy import delete
+        from app.models.config import ModelConfig as DBModelConfig
+        await async_db_session.execute(delete(DBModelConfig))
+        await async_db_session.commit()
 
         # Step 1: Create initial configurations
         created_configs = []
@@ -139,9 +149,13 @@ class TestConfigRoundtripConsistency:
 
     @pytest.mark.asyncio
     @given(configs=st.lists(mcp_server_config_strategy(), min_size=1, max_size=5))
-    @settings(max_examples=10, deadline=5000)
+    @settings(
+        max_examples=10,
+        deadline=5000,
+        suppress_health_check=[HealthCheck.function_scoped_fixture],
+    )
     async def test_mcp_config_roundtrip(
-        self, configs, db_session: AsyncSession
+        self, configs, async_db_session: AsyncSession
     ):
         """
         Property: MCP server configurations can be exported and re-imported without data loss.
@@ -150,7 +164,13 @@ class TestConfigRoundtripConsistency:
         When: Export configurations, delete originals, then import
         Then: Imported configurations match original configurations
         """
-        manager = MCPConfigManager(db_session)
+        manager = MCPConfigManager(async_db_session)
+
+        # Clean up database before each hypothesis example
+        from sqlalchemy import delete
+        from app.models.config import MCPServerConfig as DBMCPServerConfig
+        await async_db_session.execute(delete(DBMCPServerConfig))
+        await async_db_session.commit()
 
         # Step 1: Create initial configurations
         created_configs = []
@@ -208,7 +228,7 @@ class TestConfigRoundtripConsistency:
 
     @pytest.mark.asyncio
     async def test_complete_system_config_roundtrip(
-        self, db_session: AsyncSession
+        self, async_db_session: AsyncSession
     ):
         """
         Test: Complete system configuration can be exported and restored.
@@ -217,7 +237,7 @@ class TestConfigRoundtripConsistency:
         can be exported, the system can be reset, and then restored to the same state.
         """
         # Create model configurations
-        model_manager = ModelConfigManager(db_session)
+        model_manager = ModelConfigManager(async_db_session)
         model_configs = [
             await model_manager.save_configuration(
                 provider="anthropic",
@@ -234,7 +254,7 @@ class TestConfigRoundtripConsistency:
         ]
 
         # Create MCP configurations
-        mcp_manager = MCPConfigManager(db_session)
+        mcp_manager = MCPConfigManager(async_db_session)
         mcp_configs = [
             await mcp_manager.save_configuration(
                 MCPServerConfig(
@@ -300,14 +320,14 @@ class TestConfigRoundtripConsistency:
 
     @pytest.mark.asyncio
     async def test_config_export_excludes_sensitive_data_by_default(
-        self, db_session: AsyncSession
+        self, async_db_session: AsyncSession
     ):
         """
         Test: Configuration export excludes sensitive data (API keys) by default.
 
         This verifies requirement 23.2: Sensitive information handling.
         """
-        manager = ModelConfigManager(db_session)
+        manager = ModelConfigManager(async_db_session)
 
         # Create configuration with API key
         config = await manager.save_configuration(
@@ -337,14 +357,14 @@ class TestConfigRoundtripConsistency:
 
     @pytest.mark.asyncio
     async def test_config_import_handles_duplicate_names(
-        self, db_session: AsyncSession
+        self, async_db_session: AsyncSession
     ):
         """
         Test: Configuration import handles duplicate names correctly.
 
         This verifies requirement 23.5: Selective import.
         """
-        manager = ModelConfigManager(db_session)
+        manager = ModelConfigManager(async_db_session)
 
         # Create original configuration
         original = await manager.save_configuration(
@@ -383,7 +403,7 @@ class TestConfigRoundtripConsistency:
         assert len(imported_no_overwrite) == 0
 
         # Verify original unchanged
-        await db_session.refresh(original)
+        await async_db_session.refresh(original)
         assert original.model_name == "claude-3-sonnet-20240229"
 
         # Import with overwrite - should update
