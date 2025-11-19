@@ -38,6 +38,11 @@ class ChatSession(Base, BaseMixin, WorkspaceMixin):
         back_populates="session",
         cascade="all, delete-orphan",
     )
+    agent_runs = relationship(
+        "AgentRun",
+        back_populates="session",
+        cascade="all, delete-orphan",
+    )
 
     def __repr__(self) -> str:
         """String representation."""
