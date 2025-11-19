@@ -4,6 +4,7 @@ from app.models.config import MCPServerConfig, ModelConfig, SkillPackage
 from app.models.file import ContextFile, FileVersion
 from app.models.memory import Memory
 from app.models.page import Page
+from app.models.prompt import InspirationBoard, PromptSuggestion
 from app.models.task import TodoTask, WritingPlan
 from app.models.user import User
 from app.models.workspace import Workspace, WorkspaceMember
@@ -23,4 +24,6 @@ __all__ = [
     "ModelConfig",
     "MCPServerConfig",
     "SkillPackage",
+    "PromptSuggestion",
+    "InspirationBoard",
 ]
