@@ -3,10 +3,10 @@ from datetime import datetime
 from typing import Any, Optional
 
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
-from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import relationship
 
 from app.db.base import Base
+from app.db.types import JSONType, UUIDType
 from app.models.mixins import BaseMixin
 
 
@@ -16,18 +16,18 @@ class Workspace(Base, BaseMixin):
     __tablename__ = "workspaces"
 
     name = Column(String, nullable=False)
-    owner_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    owner_id = Column(UUIDType, ForeignKey("users.id"), nullable=False)
     description = Column(String, nullable=True)
     icon = Column(String, nullable=True)
     last_accessed_at = Column(
         DateTime(timezone=True),
         nullable=True,
     )
-    active_project_id = Column(UUID(as_uuid=True), nullable=True)
+    active_project_id = Column(UUIDType, nullable=True)
 
-    # Statistics stored as JSONB
+    # Statistics stored as JSON/JSONB
     stats = Column(
-        JSONB,
+        JSONType,
         nullable=False,
         default={
             "pageCount": 0,
@@ -57,13 +57,13 @@ class WorkspaceMember(Base, BaseMixin):
     __tablename__ = "workspace_members"
 
     workspace_id = Column(
-        UUID(as_uuid=True),
+        UUIDType,
         ForeignKey("workspaces.id"),
         nullable=False,
         index=True,
     )
     user_id = Column(
-        UUID(as_uuid=True),
+        UUIDType,
         ForeignKey("users.id"),
         nullable=False,
         index=True,

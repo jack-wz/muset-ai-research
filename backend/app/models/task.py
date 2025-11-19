@@ -2,10 +2,10 @@
 from typing import Any
 
 from sqlalchemy import Column, DateTime, ForeignKey, String, Text
-from sqlalchemy.dialects.postgresql import ARRAY, JSONB, UUID
 from sqlalchemy.orm import relationship
 
 from app.db.base import Base
+from app.db.types import ArrayType, JSONType, UUIDType
 from app.models.mixins import BaseMixin, WorkspaceMixin
 
 
@@ -15,12 +15,12 @@ class WritingPlan(Base, BaseMixin, WorkspaceMixin):
     __tablename__ = "writing_plans"
 
     workspace_id = Column(
-        UUID(as_uuid=True),
+        UUIDType,
         ForeignKey("workspaces.id"),
         nullable=False,
         index=True,
     )
-    page_id = Column(UUID(as_uuid=True), nullable=True)
+    page_id = Column(UUIDType, nullable=True)
     goal = Column(Text, nullable=False)
     source_prompt = Column(Text, nullable=False)
     status = Column(
@@ -28,10 +28,10 @@ class WritingPlan(Base, BaseMixin, WorkspaceMixin):
         default="pending",
         nullable=False,
     )  # pending, active, completed, archived
-    current_task_id = Column(UUID(as_uuid=True), nullable=True)
+    current_task_id = Column(UUIDType, nullable=True)
 
     # Task IDs as array
-    task_ids = Column(ARRAY(String), default=[], nullable=False)
+    task_ids = Column(ArrayType(String), default=[], nullable=False)
 
     # Relationships
     workspace = relationship("Workspace", back_populates="writing_plans")
@@ -48,7 +48,7 @@ class TodoTask(Base, BaseMixin):
     __tablename__ = "todo_tasks"
 
     plan_id = Column(
-        UUID(as_uuid=True),
+        UUIDType,
         ForeignKey("writing_plans.id"),
         nullable=False,
         index=True,
@@ -67,8 +67,8 @@ class TodoTask(Base, BaseMixin):
     priority = Column(String, default="medium", nullable=False)  # low, medium, high
 
     # Dependencies and outputs
-    dependencies = Column(ARRAY(String), default=[], nullable=False)
-    outputs = Column(JSONB, default=[], nullable=False)
+    dependencies = Column(ArrayType(String), default=[], nullable=False)
+    outputs = Column(JSONType, default=[], nullable=False)
 
     # Agent assignment
     assigned_agent_id = Column(String, nullable=True)

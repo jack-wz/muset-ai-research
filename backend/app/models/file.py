@@ -2,10 +2,10 @@
 from typing import Any
 
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Text
-from sqlalchemy.dialects.postgresql import ARRAY, UUID
 from sqlalchemy.orm import relationship
 
 from app.db.base import Base
+from app.db.types import ArrayType, UUIDType
 from app.models.mixins import BaseMixin, WorkspaceMixin
 
 
@@ -15,7 +15,7 @@ class ContextFile(Base, BaseMixin, WorkspaceMixin):
     __tablename__ = "context_files"
 
     workspace_id = Column(
-        UUID(as_uuid=True),
+        UUIDType,
         ForeignKey("workspaces.id"),
         nullable=False,
         index=True,
@@ -31,7 +31,7 @@ class ContextFile(Base, BaseMixin, WorkspaceMixin):
     checksum = Column(String, nullable=False)
 
     # References
-    related_pages = Column(ARRAY(String), default=[], nullable=False)
+    related_pages = Column(ArrayType(String), default=[], nullable=False)
 
     # Relationships
     workspace = relationship("Workspace", back_populates="context_files")
@@ -52,7 +52,7 @@ class FileVersion(Base, BaseMixin):
     __tablename__ = "file_versions"
 
     file_id = Column(
-        UUID(as_uuid=True),
+        UUIDType,
         ForeignKey("context_files.id"),
         nullable=False,
         index=True,

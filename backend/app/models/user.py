@@ -3,10 +3,10 @@ from datetime import datetime
 from typing import Optional
 
 from sqlalchemy import Boolean, Column, DateTime, Integer, String
-from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 
 from app.db.base import Base
+from app.db.types import JSONType
 from app.models.mixins import BaseMixin
 
 
@@ -27,9 +27,9 @@ class User(Base, BaseMixin):
     ai_chats_total = Column(Integer, default=50, nullable=False)
     subscription_expires_at = Column(DateTime(timezone=True), nullable=True)
 
-    # Settings stored as JSONB
+    # Settings stored as JSON/JSONB
     settings = Column(
-        JSONB,
+        JSONType,
         nullable=False,
         default={
             "language": "en",

@@ -4,9 +4,10 @@ from typing import Any
 import uuid
 
 from sqlalchemy import Column, DateTime
-from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.sql import func
+
+from app.db.types import UUIDType
 
 
 class UUIDMixin:
@@ -18,7 +19,7 @@ class UUIDMixin:
     def id(cls):  # type: ignore
         """UUID primary key."""
         return Column(
-            UUID(as_uuid=True),
+            UUIDType,
             primary_key=True,
             default=uuid.uuid4,
             nullable=False,
@@ -35,6 +36,7 @@ class TimestampMixin:
         """Record creation timestamp."""
         return Column(
             DateTime(timezone=True),
+            default=datetime.utcnow,
             server_default=func.now(),
             nullable=False,
         )
@@ -44,8 +46,9 @@ class TimestampMixin:
         """Record last update timestamp."""
         return Column(
             DateTime(timezone=True),
+            default=datetime.utcnow,
             server_default=func.now(),
-            onupdate=func.now(),
+            onupdate=datetime.utcnow,
             nullable=False,
         )
 
@@ -65,7 +68,7 @@ class WorkspaceMixin:
     def workspace_id(cls):  # type: ignore
         """Workspace foreign key."""
         return Column(
-            UUID(as_uuid=True),
+            UUIDType,
             nullable=False,
             index=True,
         )

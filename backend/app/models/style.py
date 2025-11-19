@@ -1,8 +1,8 @@
 """Writing style models."""
 from sqlalchemy import Column, ForeignKey, Integer, String, Text
-from sqlalchemy.dialects.postgresql import JSONB
 
 from app.db.base import Base
+from app.db.types import JSONType
 from app.models.mixins import BaseMixin
 
 
@@ -23,10 +23,10 @@ class WritingStyle(Base, BaseMixin):
     )  # 1-10 scale
 
     # Example samples for style learning
-    sample_texts = Column(JSONB, default=[], nullable=False)
+    sample_texts = Column(JSONType, default=[], nullable=False)
 
     # Extracted style features
-    style_features = Column(JSONB, nullable=True)
+    style_features = Column(JSONType, nullable=True)
 
     # Is this the active style?
     is_active = Column(Integer, default=0, nullable=False)

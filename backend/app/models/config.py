@@ -2,10 +2,10 @@
 from typing import Any
 
 from sqlalchemy import Boolean, Column, DateTime, Integer, String, Text
-from sqlalchemy.dialects.postgresql import ARRAY, JSONB
 from sqlalchemy.orm import relationship
 
 from app.db.base import Base
+from app.db.types import ArrayType, JSONType
 from app.models.mixins import BaseMixin
 
 
@@ -23,7 +23,7 @@ class ModelConfig(Base, BaseMixin):
 
     # Capabilities
     capabilities = Column(
-        JSONB,
+        JSONType,
         nullable=False,
         default={
             "streaming": True,
@@ -34,7 +34,7 @@ class ModelConfig(Base, BaseMixin):
     )
 
     # Guardrails
-    guardrails = Column(JSONB, nullable=True)
+    guardrails = Column(JSONType, nullable=True)
 
     def __repr__(self) -> str:
         """String representation."""
@@ -51,8 +51,8 @@ class MCPServerConfig(Base, BaseMixin):
 
     # For stdio protocol
     command = Column(String, nullable=True)  # Command to start MCP server
-    args = Column(ARRAY(String), nullable=True)  # Command arguments
-    env = Column(JSONB, nullable=True)  # Environment variables
+    args = Column(ArrayType(String), nullable=True)  # Command arguments
+    env = Column(JSONType, nullable=True)  # Environment variables
 
     # For http/ws protocols
     endpoint = Column(String, nullable=True)  # URL endpoint for http/ws
@@ -67,9 +67,9 @@ class MCPServerConfig(Base, BaseMixin):
     last_connected_at = Column(DateTime(timezone=True), nullable=True)
 
     # Tools and retry policy
-    tools = Column(JSONB, default=[], nullable=False)
+    tools = Column(JSONType, default=[], nullable=False)
     retry_policy = Column(
-        JSONB,
+        JSONType,
         nullable=False,
         default={"maxAttempts": 3, "backoffMs": 1000},
     )
@@ -95,12 +95,12 @@ class SkillPackage(Base, BaseMixin):
     default_enabled = Column(Boolean, default=False, nullable=False)
 
     # Resources and tools
-    required_resources = Column(JSONB, default=[], nullable=False)
-    exposed_tools = Column(JSONB, default=[], nullable=False)
+    required_resources = Column(JSONType, default=[], nullable=False)
+    exposed_tools = Column(JSONType, default=[], nullable=False)
 
     # Sandbox policy
     sandbox_policy = Column(
-        JSONB,
+        JSONType,
         nullable=False,
         default={
             "allowNetwork": False,
