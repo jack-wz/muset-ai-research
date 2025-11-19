@@ -36,6 +36,7 @@ class WritingPlan(Base, BaseMixin, WorkspaceMixin):
     # Relationships
     workspace = relationship("Workspace", back_populates="writing_plans")
     tasks = relationship("TodoTask", back_populates="plan", cascade="all, delete-orphan")
+    agent_runs = relationship("AgentRun", back_populates="plan")
 
     def __repr__(self) -> str:
         """String representation."""

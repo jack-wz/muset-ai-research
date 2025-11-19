@@ -40,6 +40,11 @@ class ContextFile(Base, BaseMixin, WorkspaceMixin):
         back_populates="file",
         cascade="all, delete-orphan",
     )
+    upload_asset = relationship(
+        "UploadAsset",
+        back_populates="context_file",
+        uselist=False,
+    )
 
     def __repr__(self) -> str:
         """String representation."""

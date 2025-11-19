@@ -49,6 +49,7 @@ class User(Base, BaseMixin):
         foreign_keys="Workspace.owner_id",
     )
     workspace_members = relationship("WorkspaceMember", back_populates="user")
+    uploads = relationship("UploadAsset", back_populates="uploader")
 
     def __repr__(self) -> str:
         """String representation."""
