@@ -1,7 +1,7 @@
 """API v1 router."""
 from fastapi import APIRouter
 
-from app.api.v1 import auth, config, mcp_config, models, search, skills, users
+from app.api.v1 import auth, config, mcp_config, models, notifications, search, skills, users
 
 api_router = APIRouter()
 
@@ -13,3 +13,4 @@ api_router.include_router(mcp_config.router, prefix="/mcp", tags=["mcp"])
 api_router.include_router(skills.router, prefix="/skills", tags=["skills"])
 api_router.include_router(config.router, prefix="/config", tags=["config"])
 api_router.include_router(search.router, prefix="/search", tags=["search"])
+api_router.include_router(notifications.router, prefix="/notifications", tags=["notifications"])

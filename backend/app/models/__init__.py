@@ -5,6 +5,7 @@ from app.models.chat import ChatMessage, ChatSession
 from app.models.config import MCPServerConfig, ModelConfig, SkillPackage
 from app.models.file import ContextFile, FileVersion
 from app.models.memory import Memory
+from app.models.notification import Notification, NotificationPreference
 from app.models.page import Page
 from app.models.prompt import InspirationBoard, PromptSuggestion
 from app.models.search import SearchHistory, SearchIndex
@@ -39,4 +40,6 @@ __all__ = [
     "SubscriptionHistory",
     "SearchIndex",
     "SearchHistory",
+    "Notification",
+    "NotificationPreference",
 ]
