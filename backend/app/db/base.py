@@ -8,6 +8,7 @@ Base.__allow_unmapped__ = True
 # Import all models here for Alembic migrations
 # This ensures all models are registered with Base
 from app.models.agent import AgentRun, AgentStep, SubAgentContext  # noqa: F401, E402
+from app.models.audit import AuditLog  # noqa: F401, E402
 from app.models.chat import ChatMessage, ChatSession  # noqa: F401, E402
 from app.models.config import MCPServerConfig, ModelConfig, SkillPackage  # noqa: F401, E402
 from app.models.file import ContextFile, FileVersion  # noqa: F401, E402
@@ -15,6 +16,7 @@ from app.models.memory import Memory  # noqa: F401, E402
 from app.models.page import Page  # noqa: F401, E402
 from app.models.prompt import InspirationBoard, PromptSuggestion  # noqa: F401, E402
 from app.models.style import WritingStyle  # noqa: F401, E402
+from app.models.subscription import SubscriptionHistory  # noqa: F401, E402
 from app.models.task import TodoTask, WritingPlan  # noqa: F401, E402
 from app.models.upload import UploadAsset  # noqa: F401, E402
 from app.models.user import User  # noqa: F401, E402

@@ -47,6 +47,7 @@ class Workspace(Base, BaseMixin):
     chat_sessions = relationship("ChatSession", back_populates="workspace")
     inspiration_boards = relationship("InspirationBoard", back_populates="workspace")
     upload_assets = relationship("UploadAsset", back_populates="workspace")
+    audit_logs = relationship("AuditLog", back_populates="workspace")
 
     def __repr__(self) -> str:
         """String representation."""
