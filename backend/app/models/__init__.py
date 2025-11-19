@@ -7,6 +7,7 @@ from app.models.file import ContextFile, FileVersion
 from app.models.memory import Memory
 from app.models.page import Page
 from app.models.prompt import InspirationBoard, PromptSuggestion
+from app.models.search import SearchHistory, SearchIndex
 from app.models.subscription import SubscriptionHistory
 from app.models.task import TodoTask, WritingPlan
 from app.models.upload import UploadAsset
@@ -36,4 +37,6 @@ __all__ = [
     "SubAgentContext",
     "AuditLog",
     "SubscriptionHistory",
+    "SearchIndex",
+    "SearchHistory",
 ]

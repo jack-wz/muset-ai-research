@@ -106,7 +106,7 @@ class SubscriptionHistory(Base, BaseMixin):
         comment="Additional notes about this change",
     )
 
-    metadata = Column(
+    meta = Column(
         JSONB,
         nullable=True,
         default={},
