@@ -72,7 +72,8 @@ class AgentRun(Base, BaseMixin):
     )
 
     # Execution metadata
-    metadata = Column(
+    execution_metadata = Column(
+        "metadata",
         JSONB,
         nullable=True,
         default={},
@@ -199,7 +200,8 @@ class AgentStep(Base, BaseMixin):
     )
 
     # Additional metadata
-    metadata = Column(
+    step_metadata = Column(
+        "metadata",
         JSONB,
         nullable=True,
         default={},
@@ -310,7 +312,8 @@ class SubAgentContext(Base, BaseMixin):
     )
 
     # Additional metadata
-    metadata = Column(
+    context_metadata = Column(
+        "metadata",
         JSONB,
         nullable=True,
         default={},

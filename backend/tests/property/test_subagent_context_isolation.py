@@ -26,7 +26,7 @@ def subagent_manager(mock_llm):
 
 
 # Property 4: SubAgent context isolation
-@settings(max_examples=30)
+@settings(max_examples=100)
 @given(
     # Generate large irrelevant context
     irrelevant_messages=st.lists(
@@ -38,17 +38,27 @@ def subagent_manager(mock_llm):
 )
 @pytest.mark.asyncio
 async def test_subagent_context_filtered(
-    subagent_manager: SubAgentManager,
     irrelevant_messages: list,
     relevant_context: str,
 ):
     """
+    **Feature: ai-writing-assistant, Property 4: SubAgent context isolation**
+    
     Test that sub-agent receives only relevant context.
 
     This property verifies:
     - Context is filtered before passing to sub-agent (Req 3.2)
     - Irrelevant information is excluded
+    
+    **Validates: Requirements 3.2**
     """
+    # Create mock LLM inside test to avoid fixture issues
+    mock_llm = AsyncMock()
+    mock_llm.ainvoke.return_value = AIMessage(content="[0, 1, 2]")  # Return indices
+    
+    # Create manager
+    subagent_manager = SubAgentManager(llm=mock_llm)
+    
     # Create large context
     context = [HumanMessage(content=msg) for msg in irrelevant_messages]
     context.append(HumanMessage(content=relevant_context))

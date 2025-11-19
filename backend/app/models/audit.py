@@ -75,7 +75,8 @@ class AuditLog(Base, BaseMixin):
     )
 
     # Additional metadata
-    metadata = Column(
+    audit_metadata = Column(
+        "metadata",
         JSONB,
         nullable=True,
         default={},
