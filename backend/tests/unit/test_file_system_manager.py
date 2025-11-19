@@ -122,3 +122,82 @@ async def test_file_versioning(file_system_manager: FileSystemManager):
     # Check versions
     versions = await file_system_manager.get_file_versions(path)
     assert len(versions) >= 2
+
+
+@pytest.mark.asyncio
+async def test_edit_file_lines_single_edit(file_system_manager: FileSystemManager):
+    """Test editing single line."""
+    from app.services.file_system_manager import Edit
+
+    path = "test_lines.txt"
+    initial_content = "Line 1\nLine 2\nLine 3\nLine 4\nLine 5"
+
+    # Create file
+    await file_system_manager.write_file(path, initial_content)
+
+    # Edit line 3
+    edits = [Edit(start_line=3, end_line=3, new_content="Modified Line 3")]
+    await file_system_manager.edit_file_lines(path, edits)
+
+    # Verify
+    content = await file_system_manager.read_file(path)
+    assert content == "Line 1\nLine 2\nModified Line 3\nLine 4\nLine 5"
+
+
+@pytest.mark.asyncio
+async def test_edit_file_lines_multiple_edits(file_system_manager: FileSystemManager):
+    """Test editing multiple lines."""
+    from app.services.file_system_manager import Edit
+
+    path = "test_multiple.txt"
+    initial_content = "Line 1\nLine 2\nLine 3\nLine 4\nLine 5"
+
+    # Create file
+    await file_system_manager.write_file(path, initial_content)
+
+    # Edit multiple lines
+    edits = [
+        Edit(start_line=2, end_line=3, new_content="New Line 2\nNew Line 3"),
+        Edit(start_line=5, end_line=5, new_content="New Line 5"),
+    ]
+    await file_system_manager.edit_file_lines(path, edits)
+
+    # Verify
+    content = await file_system_manager.read_file(path)
+    assert content == "Line 1\nNew Line 2\nNew Line 3\nLine 4\nNew Line 5"
+
+
+@pytest.mark.asyncio
+async def test_edit_file_lines_invalid_range(file_system_manager: FileSystemManager):
+    """Test that invalid line ranges raise errors."""
+    from app.services.file_system_manager import Edit
+
+    path = "test_invalid.txt"
+    await file_system_manager.write_file(path, "Line 1\nLine 2\nLine 3")
+
+    # Test invalid range (start > end)
+    with pytest.raises(ValueError, match="Invalid edit range"):
+        edits = [Edit(start_line=3, end_line=2, new_content="Invalid")]
+        await file_system_manager.edit_file_lines(path, edits)
+
+    # Test out of bounds
+    with pytest.raises(ValueError, match="exceeds file length"):
+        edits = [Edit(start_line=1, end_line=10, new_content="Invalid")]
+        await file_system_manager.edit_file_lines(path, edits)
+
+
+@pytest.mark.asyncio
+async def test_edit_file_lines_overlapping_edits(file_system_manager: FileSystemManager):
+    """Test that overlapping edits raise errors."""
+    from app.services.file_system_manager import Edit
+
+    path = "test_overlap.txt"
+    await file_system_manager.write_file(path, "Line 1\nLine 2\nLine 3\nLine 4\nLine 5")
+
+    # Test overlapping edits
+    with pytest.raises(ValueError, match="Overlapping edits"):
+        edits = [
+            Edit(start_line=2, end_line=4, new_content="Edit 1"),
+            Edit(start_line=3, end_line=5, new_content="Edit 2"),  # Overlaps with first
+        ]
+        await file_system_manager.edit_file_lines(path, edits)

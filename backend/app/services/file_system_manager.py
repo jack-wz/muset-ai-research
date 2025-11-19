@@ -2,6 +2,7 @@
 import asyncio
 import hashlib
 import os
+from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -11,6 +12,15 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.exceptions import FileNotFoundError, PermissionDeniedError
 from app.models.file import ContextFile, FileVersion
+
+
+@dataclass
+class Edit:
+    """Represents a single edit operation on a file."""
+
+    start_line: int  # 1-based line number
+    end_line: int  # 1-based line number (inclusive)
+    new_content: str  # New content to replace the lines
 
 
 class FileSystemManager:
@@ -188,6 +198,80 @@ class FileSystemManager:
             raise ValueError(f"Content to replace not found in file: {path}")
 
         updated_content = current_content.replace(old_content, new_content, 1)
+
+        # Write updated content
+        return await self.write_file(path, updated_content, agent_id=agent_id)
+
+    async def edit_file_lines(
+        self,
+        path: str,
+        edits: List[Edit],
+        agent_id: Optional[str] = None,
+    ) -> ContextFile:
+        """
+        Edit a file by applying multiple line-based edits.
+
+        Args:
+            path: Relative path to the file
+            edits: List of Edit objects specifying line ranges and new content
+            agent_id: ID of the agent making the edit
+
+        Returns:
+            Updated ContextFile instance
+
+        Raises:
+            FileNotFoundError: If file doesn't exist
+            ValueError: If edit ranges are invalid or overlapping
+
+        Example:
+            >>> edits = [
+            ...     Edit(start_line=5, end_line=7, new_content="New lines 5-7"),
+            ...     Edit(start_line=10, end_line=10, new_content="Replace line 10"),
+            ... ]
+            >>> await manager.edit_file_lines("test.txt", edits)
+        """
+        # Read current content
+        current_content = await self.read_file(path)
+        lines = current_content.split("\n")
+
+        # Validate and sort edits by line number (descending) to apply from bottom to top
+        sorted_edits = sorted(edits, key=lambda e: e.start_line, reverse=True)
+
+        # Validate edits
+        for i, edit in enumerate(sorted_edits):
+            if edit.start_line < 1 or edit.end_line < edit.start_line:
+                raise ValueError(
+                    f"Invalid edit range: lines {edit.start_line}-{edit.end_line}"
+                )
+
+            if edit.end_line > len(lines):
+                raise ValueError(
+                    f"Edit range {edit.start_line}-{edit.end_line} exceeds file length {len(lines)}"
+                )
+
+            # Check for overlapping edits
+            if i > 0:
+                prev_edit = sorted_edits[i - 1]
+                if edit.end_line >= prev_edit.start_line:
+                    raise ValueError(
+                        f"Overlapping edits: {edit.start_line}-{edit.end_line} and "
+                        f"{prev_edit.start_line}-{prev_edit.end_line}"
+                    )
+
+        # Apply edits from bottom to top to maintain line numbers
+        for edit in sorted_edits:
+            # Convert to 0-based indexing
+            start_idx = edit.start_line - 1
+            end_idx = edit.end_line  # end_line is inclusive, so we don't subtract 1
+
+            # Split new content into lines
+            new_lines = edit.new_content.split("\n") if edit.new_content else []
+
+            # Replace the range
+            lines[start_idx:end_idx] = new_lines
+
+        # Join lines back together
+        updated_content = "\n".join(lines)
 
         # Write updated content
         return await self.write_file(path, updated_content, agent_id=agent_id)
