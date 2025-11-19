@@ -13,6 +13,7 @@ import {
   X,
 } from "phosphor-react";
 import { apiClient } from "@/lib/api/client";
+import { DiffViewer } from "../editor/diff-viewer";
 
 interface AIToolbarProps {
   editor: Editor;
@@ -23,8 +24,17 @@ interface AIToolbarProps {
 
 type AIAction = "continue" | "summarize" | "polish" | "translate" | "expand";
 
+interface DiffState {
+  originalText: string;
+  modifiedText: string;
+  action: AIAction;
+  from: number;
+  to: number;
+}
+
 export function AIToolbar({ editor, workspaceId, projectId, onClose }: AIToolbarProps) {
   const [isLoading, setIsLoading] = React.useState(false);
+  const [diffState, setDiffState] = React.useState<DiffState | null>(null);
 
   const handleAIAction = async (action: AIAction) => {
     try {
@@ -58,21 +68,53 @@ export function AIToolbar({ editor, workspaceId, projectId, onClose }: AIToolbar
         fullResponse += chunk;
       }
 
-      // Insert the AI response
-      if (action === "continue") {
-        editor.chain().focus().insertContentAt(to, fullResponse).run();
-      } else {
-        // Replace selected text for other actions
-        editor.chain().focus().deleteRange({ from, to }).insertContentAt(from, fullResponse).run();
-      }
-
-      onClose();
+      // Show diff viewer instead of immediately applying changes
+      setDiffState({
+        originalText: selectedText,
+        modifiedText: fullResponse,
+        action,
+        from,
+        to,
+      });
     } catch (error) {
       console.error("AI action failed:", error);
     } finally {
       setIsLoading(false);
     }
   };
+
+  const handleAccept = () => {
+    if (!diffState) return;
+
+    const { action, from, to, modifiedText } = diffState;
+
+    // Apply the changes
+    if (action === "continue") {
+      editor.chain().focus().insertContentAt(to, modifiedText).run();
+    } else {
+      // Replace selected text for other actions
+      editor.chain().focus().deleteRange({ from, to }).insertContentAt(from, modifiedText).run();
+    }
+
+    setDiffState(null);
+    onClose();
+  };
+
+  const handleReject = () => {
+    setDiffState(null);
+  };
+
+  // Show diff viewer if we have AI suggestions
+  if (diffState) {
+    return (
+      <DiffViewer
+        originalText={diffState.originalText}
+        modifiedText={diffState.modifiedText}
+        onAccept={handleAccept}
+        onReject={handleReject}
+      />
+    );
+  }
 
   return (
     <Card className="flex items-center gap-2 p-2 shadow-lg">
@@ -84,7 +126,7 @@ export function AIToolbar({ editor, workspaceId, projectId, onClose }: AIToolbar
         title="Continue writing"
       >
         <PencilSimple size={18} weight="fill" />
-        Continue
+        {isLoading ? "Loading..." : "Continue"}
       </Button>
 
       <Button
@@ -95,7 +137,7 @@ export function AIToolbar({ editor, workspaceId, projectId, onClose }: AIToolbar
         title="Summarize"
       >
         <ArrowsClockwise size={18} weight="fill" />
-        Summarize
+        {isLoading ? "Loading..." : "Summarize"}
       </Button>
 
       <Button
@@ -106,7 +148,7 @@ export function AIToolbar({ editor, workspaceId, projectId, onClose }: AIToolbar
         title="Polish"
       >
         <TextAa size={18} weight="fill" />
-        Polish
+        {isLoading ? "Loading..." : "Polish"}
       </Button>
 
       <Button
@@ -117,7 +159,7 @@ export function AIToolbar({ editor, workspaceId, projectId, onClose }: AIToolbar
         title="Translate"
       >
         <Translate size={18} weight="fill" />
-        Translate
+        {isLoading ? "Loading..." : "Translate"}
       </Button>
 
       <Button
@@ -128,12 +170,12 @@ export function AIToolbar({ editor, workspaceId, projectId, onClose }: AIToolbar
         title="Expand"
       >
         <ArrowsOutSimple size={18} weight="fill" />
-        Expand
+        {isLoading ? "Loading..." : "Expand"}
       </Button>
 
       <div className="mx-1 h-6 w-px bg-gray-300" />
 
-      <Button variant="ghost" size="icon" onClick={onClose}>
+      <Button variant="ghost" size="icon" onClick={onClose} disabled={isLoading}>
         <X size={18} />
       </Button>
     </Card>
