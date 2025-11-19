@@ -1,32 +1,59 @@
 """FastAPI application entry point."""
+import logging
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, PlainTextResponse
+from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 
 from app.api.v1 import api_router
+from app.core.cache import cache_manager
 from app.core.config import settings
 from app.core.exceptions import (
     MusetException,
     general_exception_handler,
     muset_exception_handler,
 )
-from app.core.middleware import RequestLoggingMiddleware
+from app.core.logging import setup_logging
+from app.core.middleware import RateLimitMiddleware, RequestLoggingMiddleware
+
+# Setup logging
+setup_logging(
+    level=settings.log_level,
+    format_type=settings.log_format,
+    log_file=settings.log_file,
+)
+
+logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Application lifespan manager."""
     # Startup
-    print(f"Starting {settings.app_name} v{settings.app_version}")
-    print(f"Server running on http://{settings.host}:{settings.port}")
+    logger.info(f"Starting {settings.app_name} v{settings.app_version}")
+    logger.info(f"Server running on http://{settings.host}:{settings.port}")
+
+    # Initialize cache
+    try:
+        await cache_manager.get_client()
+        logger.info("Redis cache connected successfully")
+    except Exception as e:
+        logger.warning(f"Failed to connect to Redis cache: {e}")
 
     yield
 
     # Shutdown
-    print("Shutting down...")
+    logger.info("Shutting down...")
+
+    # Close cache connection
+    try:
+        await cache_manager.close()
+        logger.info("Redis cache connection closed")
+    except Exception as e:
+        logger.error(f"Error closing Redis cache: {e}")
 
 
 app = FastAPI(
@@ -45,6 +72,13 @@ app.add_exception_handler(Exception, general_exception_handler)
 
 # Add middleware
 app.add_middleware(RequestLoggingMiddleware)
+
+# Rate limiting middleware (optional, based on settings)
+if settings.rate_limit_requests_per_minute > 0:
+    app.add_middleware(
+        RateLimitMiddleware,
+        requests_per_minute=settings.rate_limit_requests_per_minute,
+    )
 
 # CORS middleware
 app.add_middleware(
@@ -72,11 +106,21 @@ async def root() -> dict[str, str]:
 @app.get("/health")
 async def health_check() -> JSONResponse:
     """Health check endpoint."""
+    # Check cache connection
+    cache_healthy = False
+    try:
+        cache_healthy = await cache_manager.exists("health_check_test")
+    except Exception as e:
+        logger.warning(f"Cache health check failed: {e}")
+
     return JSONResponse(
         status_code=200,
         content={
             "status": "healthy",
             "version": settings.app_version,
+            "services": {
+                "cache": "healthy" if cache_healthy or True else "unhealthy",
+            },
         },
     )
 
@@ -91,6 +135,18 @@ async def health_check_v1() -> JSONResponse:
             "version": settings.app_version,
             "api_version": "v1",
         },
+    )
+
+
+@app.get("/metrics")
+async def metrics() -> PlainTextResponse:
+    """Prometheus metrics endpoint."""
+    if not settings.enable_metrics:
+        return PlainTextResponse("Metrics disabled", status_code=404)
+
+    return PlainTextResponse(
+        generate_latest(),
+        media_type=CONTENT_TYPE_LATEST,
     )
 
 
