@@ -1,5 +1,6 @@
 """Pytest configuration and fixtures."""
 import tempfile
+from datetime import datetime
 
 import pytest
 from sqlalchemy import JSON, Column, DateTime, ForeignKey, Integer, String, Text, create_engine
@@ -27,8 +28,8 @@ class TestContextFile(TestBase):
     size = Column(Integer, nullable=False)
     checksum = Column(String, nullable=False)
     related_pages = Column(JSON, default=[])
-    created_at = Column(DateTime, nullable=True)
-    updated_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow)
 
 
 class TestFileVersion(TestBase):
@@ -41,8 +42,8 @@ class TestFileVersion(TestBase):
     snapshot_path = Column(String, nullable=False)
     created_by = Column(String, nullable=False)
     diff_summary = Column(Text, nullable=True)
-    created_at = Column(DateTime, nullable=True)
-    updated_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow)
 
 
 class TestWritingPlan(TestBase):
@@ -58,8 +59,8 @@ class TestWritingPlan(TestBase):
     status = Column(String, default="pending")
     current_task_id = Column(String, nullable=True)
     task_ids = Column(JSON, default=[])
-    created_at = Column(DateTime, nullable=True)
-    updated_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow)
 
 
 class TestTodoTask(TestBase):
@@ -79,8 +80,8 @@ class TestTodoTask(TestBase):
     assigned_agent_id = Column(String, nullable=True)
     started_at = Column(DateTime, nullable=True)
     completed_at = Column(DateTime, nullable=True)
-    created_at = Column(DateTime, nullable=True)
-    updated_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow)
 
 
 class TestMemory(TestBase):
@@ -96,8 +97,8 @@ class TestMemory(TestBase):
     embedding_id = Column(String, nullable=True)
     tags = Column(JSON, default=[])
     importance_score = Column(Integer, default=0.5)
-    created_at = Column(DateTime, nullable=True)
-    updated_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow)
 
 
 # Patch models to use test models
