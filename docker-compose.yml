@@ -67,7 +67,7 @@ services:
       dockerfile: Dockerfile
     container_name: muset-frontend
     environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:7989
+      - NEXT_PUBLIC_API_URL=http://localhost:7989/api/v1
     env_file:
       - .env
     ports:

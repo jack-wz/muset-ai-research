@@ -1,6 +1,6 @@
 """Writing style models."""
 from sqlalchemy import Column, ForeignKey, Integer, String, Text
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.dialects.postgresql import JSONB, UUID
 
 from app.db.base import Base
 from app.models.mixins import BaseMixin
@@ -11,7 +11,7 @@ class WritingStyle(Base, BaseMixin):
 
     __tablename__ = "writing_styles"
 
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
     name = Column(String, nullable=False)
     description = Column(Text, nullable=True)
 

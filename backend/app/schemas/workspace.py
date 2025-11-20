@@ -1,15 +1,15 @@
 """Workspace schemas."""
 from datetime import datetime
-from typing import Optional
+from typing import Any, Dict, Optional
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class WorkspaceBase(BaseModel):
     """Base workspace schema."""
 
-    name: str
+    name: str = Field(..., min_length=1, max_length=255)
     description: Optional[str] = None
     icon: Optional[str] = None
 
@@ -23,10 +23,9 @@ class WorkspaceCreate(WorkspaceBase):
 class WorkspaceUpdate(BaseModel):
     """Workspace update schema."""
 
-    name: Optional[str] = None
+    name: Optional[str] = Field(None, min_length=1, max_length=255)
     description: Optional[str] = None
     icon: Optional[str] = None
-    active_project_id: Optional[UUID] = None
 
 
 class WorkspaceResponse(WorkspaceBase):
@@ -34,27 +33,11 @@ class WorkspaceResponse(WorkspaceBase):
 
     id: UUID
     owner_id: UUID
+    last_accessed_at: Optional[datetime] = None
     active_project_id: Optional[UUID] = None
-    stats: dict
+    stats: Dict[str, Any] = Field(default_factory=dict)
     created_at: datetime
     updated_at: datetime
-    last_accessed_at: Optional[datetime] = None
-
-    class Config:
-        """Pydantic config."""
-
-        from_attributes = True
-
-
-class WorkspaceMemberResponse(BaseModel):
-    """Workspace member response schema."""
-
-    id: UUID
-    workspace_id: UUID
-    user_id: UUID
-    role: str
-    joined_at: datetime
-    last_active_at: Optional[datetime] = None
 
     class Config:
         """Pydantic config."""

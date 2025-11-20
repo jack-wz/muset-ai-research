@@ -39,10 +39,16 @@ export class APIClient {
       headers["Authorization"] = `Bearer ${token}`;
     }
 
-    const response = await fetch(`${this.baseUrl}${endpoint}`, {
+    const url = `${this.baseUrl}${endpoint}`;
+    console.log(`API Request: ${options.method || 'GET'} ${url}`);
+    console.log('Has token:', !!token);
+
+    const response = await fetch(url, {
       ...options,
       headers,
     });
+
+    console.log(`API Response: ${response.status} ${response.statusText}`);
 
     if (!response.ok) {
       const error: ApiError = {
@@ -52,6 +58,7 @@ export class APIClient {
 
       try {
         const errorData = await response.json();
+        console.error('API Error data:', errorData);
         error.message = errorData.message || errorData.detail || error.message;
         error.code = errorData.code;
       } catch {
@@ -70,6 +77,17 @@ export class APIClient {
       method: "POST",
       body: JSON.stringify({ email, password }),
     });
+  }
+
+  async register(name: string, email: string, password: string) {
+    return this.request("/auth/register", {
+      method: "POST",
+      body: JSON.stringify({ name, email, password }),
+    });
+  }
+
+  async getCurrentUser() {
+    return this.request("/auth/me");
   }
 
   async logout() {

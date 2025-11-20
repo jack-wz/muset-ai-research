@@ -1,37 +1,33 @@
 """Page schemas."""
 from datetime import datetime
-from typing import Optional
+from typing import Any, Dict, List, Optional
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class PageBase(BaseModel):
     """Base page schema."""
 
-    title: str
-    summary: Optional[str] = None
-    status: str = "draft"
-    tags: list[str] = []
+    title: str = Field(..., min_length=1, max_length=255)
+    tiptap_content: Optional[Dict[str, Any]] = None
+    status: Optional[str] = "draft"
+    tags: Optional[List[str]] = None
 
 
 class PageCreate(PageBase):
     """Page creation schema."""
 
-    workspace_id: UUID
-    tiptap_content: dict = {}
+    pass
 
 
 class PageUpdate(BaseModel):
     """Page update schema."""
 
-    title: Optional[str] = None
-    summary: Optional[str] = None
-    cover_image: Optional[str] = None
+    title: Optional[str] = Field(None, min_length=1, max_length=255)
+    tiptap_content: Optional[Dict[str, Any]] = None
     status: Optional[str] = None
-    tags: Optional[list[str]] = None
-    tiptap_content: Optional[dict] = None
-    outline: Optional[list[dict]] = None
+    tags: Optional[List[str]] = None
 
 
 class PageResponse(PageBase):
@@ -40,14 +36,14 @@ class PageResponse(PageBase):
     id: UUID
     workspace_id: UUID
     slug: Optional[str] = None
+    summary: Optional[str] = None
     cover_image: Optional[str] = None
-    tiptap_content: dict
-    word_count: int
+    word_count: int = 0
     linked_plan_id: Optional[UUID] = None
-    linked_files: list[str]
-    linked_memories: list[str]
-    outline: list[dict]
-    ai_edited_sections: list[dict]
+    linked_files: List[str] = Field(default_factory=list)
+    linked_memories: List[str] = Field(default_factory=list)
+    outline: List[Any] = Field(default_factory=list)
+    ai_edited_sections: List[Any] = Field(default_factory=list)
     last_edited_by: Optional[UUID] = None
     created_at: datetime
     updated_at: datetime

@@ -34,13 +34,21 @@ export function WorkspaceList() {
 
   const handleCreateWorkspace = async () => {
     try {
+      console.log("Creating workspace...");
       const newWorkspace: any = await apiClient.createWorkspace({
         name: "Untitled Workspace",
       });
+      console.log("Workspace created:", newWorkspace);
       setWorkspaces([...workspaces, newWorkspace]);
       handleSelectWorkspace(newWorkspace);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to create workspace:", error);
+      console.error("Error details:", {
+        message: error.message,
+        status: error.status,
+        code: error.code,
+      });
+      alert(`Failed to create workspace: ${error.message || "Unknown error"}`);
     }
   };
 

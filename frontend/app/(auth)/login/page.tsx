@@ -22,11 +22,24 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
+      console.log("Attempting login with:", email);
       const response: any = await apiClient.login(email, password);
-      login(response.user, response.token);
-      router.push("/workspace");
+      console.log("Login response:", response);
+      
+      // Store token and fetch user info
+      if (response.access_token) {
+        localStorage.setItem("auth_token", response.access_token);
+        console.log("Fetching user info...");
+        const userInfo = await apiClient.getCurrentUser();
+        console.log("User info:", userInfo);
+        login(userInfo, response.access_token);
+        router.push("/workspace");
+      } else {
+        setError("Invalid response from server");
+      }
     } catch (err: any) {
-      setError(err.message || "Login failed. Please try again.");
+      console.error("Login error:", err);
+      setError(err.message || err.toString() || "Login failed. Please try again.");
     } finally {
       setIsLoading(false);
     }
