@@ -29,7 +29,7 @@ export function ConfigImportExport() {
   const handleExport = async () => {
     try {
       setExporting(true);
-      const response = await apiClient.get('/config/export', {
+      const response: any = await apiClient.get('/config/export', {
         params: { include_api_keys: includeApiKeys },
       });
 
@@ -70,7 +70,7 @@ export function ConfigImportExport() {
       const configData = JSON.parse(fileContent);
 
       // Validate configuration
-      const response = await apiClient.post('/config/validate', configData);
+      const response: any = await apiClient.post('/config/validate', configData);
       setValidationResult(response.data);
     } catch (error: any) {
       console.error('Failed to validate configuration:', error);
@@ -104,8 +104,8 @@ export function ConfigImportExport() {
       const fileContent = await fileInput.files[0].text();
       const configData = JSON.parse(fileContent);
 
-      const response = await apiClient.post('/config/import', {
-        data: configData,
+      const response: any = await apiClient.post('/config/import', {
+        config: configData,
         overwrite,
       });
 
@@ -205,11 +205,10 @@ export function ConfigImportExport() {
           {/* Validation Result */}
           {validationResult && (
             <div
-              className={`border rounded-md p-4 ${
-                validationResult.valid
-                  ? 'bg-green-50 border-green-200'
-                  : 'bg-red-50 border-red-200'
-              }`}
+              className={`border rounded-md p-4 ${validationResult.valid
+                ? 'bg-green-50 border-green-200'
+                : 'bg-red-50 border-red-200'
+                }`}
             >
               <div className="flex items-start">
                 <span className="text-2xl mr-3">

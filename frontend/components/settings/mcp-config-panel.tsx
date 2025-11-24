@@ -47,8 +47,8 @@ export function MCPConfigPanel() {
   const loadServers = async () => {
     try {
       setLoading(true);
-      const response = await apiClient.get('/mcp/');
-      setServers(response.data.servers);
+      const response = await apiClient.get<{ servers: MCPServerConfig[] }>('/mcp/');
+      setServers(response.servers);
     } catch (error) {
       console.error('Failed to load MCP servers:', error);
     } finally {
@@ -59,7 +59,7 @@ export function MCPConfigPanel() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const data: any = {
+      const data: Record<string, unknown> = {
         name: formData.name,
         protocol: formData.protocol,
         auth_type: formData.auth_type,

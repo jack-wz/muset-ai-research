@@ -3,25 +3,141 @@
 @tailwind utilities;
 
 :root {
+  /* Base Colors */
   --background: #ffffff;
   --foreground: #171717;
+
+  /* Muset Vibrant Palette */
+  --primary: #6366F1;
+  /* Indigo 500 */
+  --primary-foreground: #ffffff;
+  --primary-hover: #4F46E5;
+  --primary-active: #4338CA;
+
+  --secondary: #8B5CF6;
+  /* Violet 500 */
+  --secondary-foreground: #ffffff;
+
+  --accent: #EC4899;
+  /* Pink 500 */
+  --accent-foreground: #ffffff;
+
+  /* Surface Colors */
+  --surface-1: #FAFAFA;
+  --surface-2: #F5F5F5;
+  --surface-3: #E5E5E5;
+
+  /* Glassmorphism - Refined */
+  --glass-bg: rgba(255, 255, 255, 0.65);
+  --glass-border: rgba(255, 255, 255, 0.4);
+  --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+  --glass-blur: 16px;
+
+  /* UI Elements */
+  --border: #E2E8F0;
+  --input: #E2E8F0;
+  --ring: #6366F1;
+  --radius: 0.75rem;
+
+  /* Status Colors */
+  --success: #10B981;
+  --warning: #F59E0B;
+  --error: #EF4444;
+  --info: #3B82F6;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    /* Base Colors */
+    --background: #0f172a;
+    /* Slate 900 */
+    --foreground: #f8fafc;
+    /* Slate 50 */
+
+    /* Muset Vibrant Palette (Dark Mode) */
+    --primary: #818cf8;
+    /* Indigo 400 */
+    --primary-foreground: #0f172a;
+    --primary-hover: #6366F1;
+    --primary-active: #4F46E5;
+
+    --secondary: #a78bfa;
+    /* Violet 400 */
+    --secondary-foreground: #0f172a;
+
+    --accent: #f472b6;
+    /* Pink 400 */
+    --accent-foreground: #0f172a;
+
+    /* Surface Colors */
+    --surface-1: #1e293b;
+    --surface-2: #334155;
+    --surface-3: #475569;
+
+    /* Glassmorphism - Refined Dark */
+    --glass-bg: rgba(15, 23, 42, 0.6);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    --glass-blur: 16px;
+
+    /* UI Elements */
+    --border: #1e293b;
+    --input: #1e293b;
+    --ring: #818cf8;
   }
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  min-height: 100vh;
+  /* Smoother, more subtle gradient */
+  background-image:
+    radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.08) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(236, 72, 153, 0.08) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(139, 92, 246, 0.08) 0px, transparent 50%),
+    radial-gradient(at 0% 100%, rgba(56, 189, 248, 0.08) 0px, transparent 50%);
+  background-attachment: fixed;
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+
+  .glass-panel {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+  }
+
+  .glass-button {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    border: 1px solid var(--glass-border);
+    transition: all 0.2s ease;
+  }
+
+  .glass-button:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  }
+
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Hide scrollbar for IE, Edge and Firefox */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
   }
 }

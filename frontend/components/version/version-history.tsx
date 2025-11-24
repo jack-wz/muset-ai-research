@@ -1,4 +1,5 @@
 "use client";
+// Force rebuild
 
 import React from "react";
 import { Button } from "../ui/button";
@@ -9,7 +10,7 @@ import { formatRelativeTime } from "@/lib/utils";
 interface Version {
   id: string;
   version: number;
-  content: any;
+  content: unknown;
   created_at: string;
   created_by: string;
   description?: string;
@@ -92,15 +93,16 @@ export function VersionHistory({ projectId, onRestore, onClose }: VersionHistory
         {isLoading ? (
           <div className="text-center text-gray-500">Loading versions...</div>
         ) : versions.length === 0 ? (
-          <div className="text-center text-gray-500">No version history yet</div>
+          <div className="text-center text-gray-500">
+            No version history available. Make some changes to see them here.
+          </div>
         ) : (
           <div className="space-y-3">
             {versions.map((version) => (
               <Card
                 key={version.id}
-                className={`cursor-pointer p-4 transition-shadow hover:shadow-md ${
-                  selectedVersion?.id === version.id ? "border-blue-500" : ""
-                }`}
+                className={`cursor-pointer p-4 transition-shadow hover:shadow-md ${selectedVersion?.id === version.id ? "border-blue-500" : ""
+                  }`}
                 onClick={() => setSelectedVersion(version)}
               >
                 <div className="mb-2 flex items-start justify-between">
@@ -137,7 +139,7 @@ export function VersionHistory({ projectId, onRestore, onClose }: VersionHistory
         <div className="border-t border-gray-200 p-4">
           <h3 className="mb-2 font-semibold">Version {selectedVersion.version}</h3>
           <p className="text-sm text-gray-600">
-            Click "Restore" to restore this version. The current version will be saved before
+            Click &quot;Restore&quot; to restore this version. The current version will be saved before
             restoring.
           </p>
         </div>

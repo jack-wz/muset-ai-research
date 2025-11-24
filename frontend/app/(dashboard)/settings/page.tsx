@@ -1,8 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { ModelConfigPanel } from '@/components/settings/model-config-panel';
 import { MCPConfigPanel } from '@/components/settings/mcp-config-panel';
 import { SkillsConfigPanel } from '@/components/settings/skills-config-panel';
@@ -38,10 +36,9 @@ export default function SettingsPage() {
                 onClick={() => setActiveTab(tab.id)}
                 className={`
                   py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2
-                  ${
-                    activeTab === tab.id
-                      ? 'border-indigo-500 text-indigo-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  ${activeTab === tab.id
+                    ? 'border-indigo-500 text-indigo-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                   }
                 `}
               >

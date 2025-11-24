@@ -10,6 +10,10 @@ export interface ApiError {
   code?: string;
 }
 
+export interface RequestOptions extends RequestInit {
+  params?: Record<string, string | number | boolean | undefined | null>;
+}
+
 export class APIClient {
   private baseUrl: string;
   private getToken: () => string | null;
@@ -27,28 +31,38 @@ export class APIClient {
 
   private async request<T>(
     endpoint: string,
-    options: RequestInit = {}
+    options: RequestOptions = {}
   ): Promise<T> {
     const token = this.getToken();
-    const headers: HeadersInit = {
+    const headers: Record<string, string> = {
       "Content-Type": "application/json",
-      ...options.headers,
+      ...(options.headers as Record<string, string>),
     };
 
     if (token) {
       headers["Authorization"] = `Bearer ${token}`;
     }
 
-    const url = `${this.baseUrl}${endpoint}`;
-    console.log(`API Request: ${options.method || 'GET'} ${url}`);
-    console.log('Has token:', !!token);
+    let url = `${this.baseUrl}${endpoint}`;
+    if (options.params) {
+      const searchParams = new URLSearchParams();
+      Object.entries(options.params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          searchParams.append(key, String(value));
+        }
+      });
+      const separator = url.includes("?") ? "&" : "?";
+      url += `${separator}${searchParams.toString()}`;
+    }
+
+
 
     const response = await fetch(url, {
       ...options,
       headers,
     });
 
-    console.log(`API Response: ${response.status} ${response.statusText}`);
+
 
     if (!response.ok) {
       const error: ApiError = {
@@ -69,6 +83,30 @@ export class APIClient {
     }
 
     return response.json();
+  }
+
+  public async get<T>(endpoint: string, options?: RequestOptions): Promise<T> {
+    return this.request<T>(endpoint, { ...options, method: "GET" });
+  }
+
+  public async post<T>(endpoint: string, body?: unknown, options?: RequestOptions): Promise<T> {
+    return this.request<T>(endpoint, {
+      ...options,
+      method: "POST",
+      body: body ? JSON.stringify(body) : undefined,
+    });
+  }
+
+  public async put<T>(endpoint: string, body?: unknown, options?: RequestOptions): Promise<T> {
+    return this.request<T>(endpoint, {
+      ...options,
+      method: "PUT",
+      body: body ? JSON.stringify(body) : undefined,
+    });
+  }
+
+  public async delete<T>(endpoint: string, options?: RequestOptions): Promise<T> {
+    return this.request<T>(endpoint, { ...options, method: "DELETE" });
   }
 
   // Auth endpoints
@@ -129,7 +167,7 @@ export class APIClient {
   async updateProject(
     workspaceId: string,
     projectId: string,
-    data: { title?: string; content?: any }
+    data: { title?: string; content?: unknown }
   ) {
     return this.request(`/workspaces/${workspaceId}/projects/${projectId}`, {
       method: "PATCH",

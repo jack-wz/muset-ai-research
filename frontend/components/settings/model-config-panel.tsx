@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { apiClient } from '@/lib/api/client';
 
 interface ModelConfig {
@@ -20,7 +19,7 @@ interface ModelConfig {
     toolUse: boolean;
     multilingual: boolean;
   };
-  guardrails?: any;
+  guardrails?: unknown;
   created_at: string;
   updated_at: string;
 }
@@ -56,8 +55,8 @@ export function ModelConfigPanel() {
   const loadModels = async () => {
     try {
       setLoading(true);
-      const response = await apiClient.get('/models/');
-      setModels(response.data.models);
+      const response = await apiClient.get<{ models: ModelConfig[] }>('/models/');
+      setModels(response.models);
     } catch (error) {
       console.error('Failed to load models:', error);
     } finally {
@@ -111,15 +110,15 @@ export function ModelConfigPanel() {
     try {
       setTestingModel(id);
       setTestResult(null);
-      const response = await apiClient.post(`/models/${id}/test`);
-      setTestResult(response.data);
-    } catch (error: any) {
+      const response = await apiClient.post<ModelTestResult>(`/models/${id}/test`);
+      setTestResult(response);
+    } catch (error) {
       console.error('Failed to test model:', error);
       setTestResult({
         success: false,
         provider: '',
         model: '',
-        error: error.response?.data?.detail || '测试失败',
+        error: (error as any).response?.data?.detail || '测试失败',
       });
     } finally {
       setTestingModel(null);

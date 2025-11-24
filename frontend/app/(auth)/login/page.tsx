@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useAuthStore } from "@/lib/stores/auth";
+import { useAuthStore, type User } from "@/lib/stores/auth";
 import { apiClient } from "@/lib/api/client";
 
 export default function LoginPage() {
@@ -25,12 +25,12 @@ export default function LoginPage() {
       console.log("Attempting login with:", email);
       const response: any = await apiClient.login(email, password);
       console.log("Login response:", response);
-      
+
       // Store token and fetch user info
       if (response.access_token) {
         localStorage.setItem("auth_token", response.access_token);
         console.log("Fetching user info...");
-        const userInfo = await apiClient.getCurrentUser();
+        const userInfo = await apiClient.getCurrentUser() as User;
         console.log("User info:", userInfo);
         login(userInfo, response.access_token);
         router.push("/workspace");
@@ -141,7 +141,7 @@ export default function LoginPage() {
           </Button>
 
           <p className="mt-4 text-center text-sm text-gray-600">
-            Don't have an account?{" "}
+            Don&apos;t have an account?{" "}
             <a href="/signup" className="font-medium text-blue-600 hover:underline">
               Sign up
             </a>

@@ -28,7 +28,7 @@ export default function SignupPage() {
       if (response.access_token) {
         localStorage.setItem("auth_token", response.access_token);
         const userInfo = await apiClient.getCurrentUser();
-        login(userInfo, response.access_token);
+        login(userInfo as any, response.access_token);
         router.push("/workspace");
       }
     } catch (err: any) {

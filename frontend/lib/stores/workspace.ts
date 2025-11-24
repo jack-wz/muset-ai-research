@@ -13,7 +13,7 @@ export interface Project {
   id: string;
   workspace_id: string;
   title: string;
-  content?: any;
+  content?: unknown;
   status: string;
   created_at: string;
   updated_at: string;

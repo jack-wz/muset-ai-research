@@ -33,8 +33,8 @@ export function SkillsConfigPanel() {
   const loadSkills = async () => {
     try {
       setLoading(true);
-      const response = await apiClient.get('/skills/');
-      setSkills(response.data.skills);
+      const response = await apiClient.get<{ skills: SkillPackage[] }>('/skills/');
+      setSkills(response.skills);
     } catch (error) {
       console.error('Failed to load skills:', error);
     } finally {
@@ -65,9 +65,9 @@ export function SkillsConfigPanel() {
       loadSkills();
       // Reset file input
       e.target.value = '';
-    } catch (error: any) {
+    } catch (error) {
       console.error('Failed to upload skill:', error);
-      alert(error.response?.data?.detail || '上传技能包失败');
+      alert((error as any).response?.data?.detail || '上传技能包失败');
     } finally {
       setUploadingFile(false);
     }
@@ -92,8 +92,8 @@ export function SkillsConfigPanel() {
       await apiClient.post(`/skills/${id}/action`, { action });
       loadSkills();
       if (selectedSkill?.id === id) {
-        const response = await apiClient.get(`/skills/${id}`);
-        setSelectedSkill(response.data);
+        const response = await apiClient.get<SkillPackage>(`/skills/${id}`);
+        setSkills(skills.map(s => s.id === id ? response : s));
       }
     } catch (error) {
       console.error('Failed to toggle skill:', error);
@@ -103,8 +103,8 @@ export function SkillsConfigPanel() {
 
   const handleViewDetails = async (skill: SkillPackage) => {
     try {
-      const response = await apiClient.get(`/skills/${skill.id}`);
-      setSelectedSkill(response.data);
+      const response = await apiClient.get<SkillPackage>(`/skills/${skill.id}`);
+      setSelectedSkill(response);
     } catch (error) {
       console.error('Failed to load skill details:', error);
       alert('加载详情失败');
@@ -158,11 +158,10 @@ export function SkillsConfigPanel() {
             skills.map((skill) => (
               <Card
                 key={skill.id}
-                className={`p-4 cursor-pointer transition-all ${
-                  selectedSkill?.id === skill.id
-                    ? 'ring-2 ring-indigo-500'
-                    : 'hover:shadow-md'
-                }`}
+                className={`p-4 cursor-pointer transition-all ${selectedSkill?.id === skill.id
+                  ? 'ring-2 ring-indigo-500'
+                  : 'hover:shadow-md'
+                  }`}
                 onClick={() => handleViewDetails(skill)}
               >
                 <div className="flex items-start justify-between">
@@ -187,11 +186,10 @@ export function SkillsConfigPanel() {
                       e.stopPropagation();
                       handleToggleActive(skill.id, skill.active);
                     }}
-                    className={`px-3 py-1 text-sm rounded ${
-                      skill.active
-                        ? 'bg-gray-200 text-gray-800 hover:bg-gray-300'
-                        : 'bg-indigo-500 text-white hover:bg-indigo-600'
-                    }`}
+                    className={`px-3 py-1 text-sm rounded ${skill.active
+                      ? 'bg-gray-200 text-gray-800 hover:bg-gray-300'
+                      : 'bg-indigo-500 text-white hover:bg-indigo-600'
+                      }`}
                   >
                     {skill.active ? '停用' : '激活'}
                   </button>
@@ -227,11 +225,10 @@ export function SkillsConfigPanel() {
                 <h4 className="text-sm font-medium text-gray-700 mb-2">状态</h4>
                 <div className="flex items-center gap-2">
                   <span
-                    className={`px-3 py-1 text-sm rounded ${
-                      selectedSkill.active
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-gray-100 text-gray-800'
-                    }`}
+                    className={`px-3 py-1 text-sm rounded ${selectedSkill.active
+                      ? 'bg-green-100 text-green-800'
+                      : 'bg-gray-100 text-gray-800'
+                      }`}
                   >
                     {selectedSkill.active ? '已激活' : '未激活'}
                   </span>

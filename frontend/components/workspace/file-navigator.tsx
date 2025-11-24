@@ -1,9 +1,9 @@
 "use client";
+// Force rebuild
 
 import React from "react";
-import { Card } from "../ui/card";
 import { Button } from "../ui/button";
-import { File, Folder, X } from "phosphor-react";
+import { Folder, File, X } from "phosphor-react";
 import { apiClient } from "@/lib/api/client";
 import { formatRelativeTime } from "@/lib/utils";
 
@@ -27,21 +27,21 @@ export function FileNavigator({ workspaceId, onClose }: FileNavigatorProps) {
   const [fileContent, setFileContent] = React.useState<string>("");
   const [isLoading, setIsLoading] = React.useState(true);
 
-  React.useEffect(() => {
-    loadFiles();
-  }, [workspaceId]);
-
-  const loadFiles = async () => {
+  const loadFiles = React.useCallback(async () => {
     try {
       setIsLoading(true);
-      const data: any = await apiClient.getFiles(workspaceId);
+      const data = await apiClient.getFiles(workspaceId) as FileItem[];
       setFiles(data);
     } catch (error) {
       console.error("Failed to load files:", error);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [workspaceId]);
+
+  React.useEffect(() => {
+    loadFiles();
+  }, [loadFiles]);
 
   const handleFileClick = async (file: FileItem) => {
     if (file.type === "directory") return;
@@ -50,10 +50,10 @@ export function FileNavigator({ workspaceId, onClose }: FileNavigatorProps) {
     try {
       // Fetch file content
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/workspaces/${workspaceId}/files/${file.id}`,
+        `${process.env.NEXT_PUBLIC_API_URL} /workspaces/${workspaceId} /files/${file.id} `,
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
+            Authorization: `Bearer ${localStorage.getItem("auth_token")} `,
           },
         }
       );
@@ -87,9 +87,8 @@ export function FileNavigator({ workspaceId, onClose }: FileNavigatorProps) {
               <button
                 key={file.id}
                 onClick={() => handleFileClick(file)}
-                className={`flex w-full items-center gap-2 rounded-lg p-2 text-left hover:bg-gray-100 ${
-                  selectedFile?.id === file.id ? "bg-blue-50" : ""
-                }`}
+                className={`flex w - full items - center gap - 2 rounded - lg p - 2 text - left hover: bg - gray - 100 ${selectedFile?.id === file.id ? "bg-blue-50" : ""
+                  } `}
               >
                 {file.type === "directory" ? (
                   <Folder size={20} weight="fill" className="text-yellow-500" />

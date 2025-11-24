@@ -1,0 +1,45 @@
+/* 添加中文字体支持和平滑滚动 */
+@layer base {
+    html {
+        font-family: var(--font-sans);
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* 中文字体优化 */
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+            "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB",
+            "Microsoft YaHei", sans-serif;
+    }
+
+    /* 平滑滚动 */
+    * {
+        scroll-behavior: smooth;
+    }
+
+    /* 隐藏滚动条但保持功能 */
+    .scrollbar-hide {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+
+    .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+    }
+}
+
+/* 滑入动画 */
+@keyframes slide-in-right {
+    from {
+        transform: translateX(100%);
+    }
+
+    to {
+        transform: translateX(0);
+    }
+}
+
+.animate-slide-in-right {
+    animation: slide-in-right 0.3s ease-out;
+}

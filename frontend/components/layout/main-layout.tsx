@@ -17,7 +17,7 @@ export function MainLayout({ children, workspaceId }: MainLayoutProps) {
     <div className="flex h-screen flex-col bg-gray-50">
       <TopBar />
       <div className="flex flex-1 overflow-hidden">
-        <LeftSidebar workspaceId={workspaceId} />
+        <LeftSidebar />
         <main className="flex-1 overflow-auto">{children}</main>
         {isChatOpen && (
           <ChatPanel

@@ -1,16 +1,16 @@
 import { create } from "zustand";
-import type { Editor } from "@tiptap/react";
+import type { Editor, JSONContent } from "@tiptap/react";
 
 interface EditorState {
   editor: Editor | null;
-  content: any;
+  content: JSONContent | null;
   isSaving: boolean;
   lastSaved: Date | null;
   selectedText: string;
   selectionRange: { from: number; to: number } | null;
 
   setEditor: (editor: Editor | null) => void;
-  setContent: (content: any) => void;
+  setContent: (content: JSONContent) => void;
   setSaving: (saving: boolean) => void;
   setLastSaved: (date: Date) => void;
   setSelection: (text: string, range: { from: number; to: number } | null) => void;

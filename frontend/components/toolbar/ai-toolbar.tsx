@@ -81,10 +81,10 @@ export function AIToolbar({ editor, workspaceId, projectId, onClose }: AIToolbar
         size="sm"
         disabled={isLoading}
         onClick={() => handleAIAction("continue")}
-        title="Continue writing"
+        title="继续写作"
       >
         <PencilSimple size={18} weight="fill" />
-        Continue
+        继续写作
       </Button>
 
       <Button
@@ -92,10 +92,10 @@ export function AIToolbar({ editor, workspaceId, projectId, onClose }: AIToolbar
         size="sm"
         disabled={isLoading}
         onClick={() => handleAIAction("summarize")}
-        title="Summarize"
+        title="总结"
       >
         <ArrowsClockwise size={18} weight="fill" />
-        Summarize
+        总结
       </Button>
 
       <Button
@@ -103,10 +103,10 @@ export function AIToolbar({ editor, workspaceId, projectId, onClose }: AIToolbar
         size="sm"
         disabled={isLoading}
         onClick={() => handleAIAction("polish")}
-        title="Polish"
+        title="润色"
       >
         <TextAa size={18} weight="fill" />
-        Polish
+        润色
       </Button>
 
       <Button
@@ -114,10 +114,10 @@ export function AIToolbar({ editor, workspaceId, projectId, onClose }: AIToolbar
         size="sm"
         disabled={isLoading}
         onClick={() => handleAIAction("translate")}
-        title="Translate"
+        title="翻译"
       >
         <Translate size={18} weight="fill" />
-        Translate
+        翻译
       </Button>
 
       <Button
@@ -125,10 +125,10 @@ export function AIToolbar({ editor, workspaceId, projectId, onClose }: AIToolbar
         size="sm"
         disabled={isLoading}
         onClick={() => handleAIAction("expand")}
-        title="Expand"
+        title="扩写"
       >
         <ArrowsOutSimple size={18} weight="fill" />
-        Expand
+        扩写
       </Button>
 
       <div className="mx-1 h-6 w-px bg-gray-300" />

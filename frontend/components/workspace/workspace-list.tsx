@@ -16,39 +16,32 @@ export function WorkspaceList() {
   const [searchQuery, setSearchQuery] = React.useState("");
   const [isLoading, setIsLoading] = React.useState(true);
 
-  React.useEffect(() => {
-    loadWorkspaces();
-  }, []);
-
-  const loadWorkspaces = async () => {
+  const loadWorkspaces = React.useCallback(async () => {
     try {
       setIsLoading(true);
-      const data: any = await apiClient.getWorkspaces();
+      const data = await apiClient.getWorkspaces() as Workspace[];
       setWorkspaces(data);
     } catch (error) {
       console.error("Failed to load workspaces:", error);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [setWorkspaces]);
+
+  React.useEffect(() => {
+    loadWorkspaces();
+  }, [loadWorkspaces]);
 
   const handleCreateWorkspace = async () => {
     try {
-      console.log("Creating workspace...");
-      const newWorkspace: any = await apiClient.createWorkspace({
-        name: "Untitled Workspace",
-      });
-      console.log("Workspace created:", newWorkspace);
+      const newWorkspace = await apiClient.createWorkspace({
+        name: "无标题工作区",
+      }) as Workspace;
       setWorkspaces([...workspaces, newWorkspace]);
       handleSelectWorkspace(newWorkspace);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Failed to create workspace:", error);
-      console.error("Error details:", {
-        message: error.message,
-        status: error.status,
-        code: error.code,
-      });
-      alert(`Failed to create workspace: ${error.message || "Unknown error"}`);
+      alert("创建工作区失败");
     }
   };
 
@@ -62,19 +55,19 @@ export function WorkspaceList() {
   );
 
   if (isLoading) {
-    return <div className="text-center">Loading workspaces...</div>;
+    return <div className="text-center">加载工作区中...</div>;
   }
 
   return (
     <div className="container mx-auto max-w-6xl py-12">
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Workspaces</h1>
-          <p className="text-gray-600">Select a workspace to continue</p>
+          <h1 className="text-3xl font-bold">工作区</h1>
+          <p className="text-gray-600">选择一个工作区继续</p>
         </div>
         <Button onClick={handleCreateWorkspace}>
           <Plus size={20} weight="bold" />
-          New Workspace
+          新建工作区
         </Button>
       </div>
 
@@ -86,7 +79,7 @@ export function WorkspaceList() {
           />
           <Input
             type="text"
-            placeholder="Search workspaces..."
+            placeholder="搜索工作区..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10"
@@ -116,9 +109,9 @@ export function WorkspaceList() {
 
       {filteredWorkspaces.length === 0 && (
         <div className="py-12 text-center">
-          <p className="text-gray-500">No workspaces found</p>
+          <p className="text-gray-500">未找到工作区</p>
           <Button className="mt-4" onClick={handleCreateWorkspace}>
-            Create your first workspace
+            创建你的第一个工作区
           </Button>
         </div>
       )}
